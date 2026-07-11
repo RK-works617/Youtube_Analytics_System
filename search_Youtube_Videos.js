@@ -19,6 +19,37 @@ function fetchAndWriteYoutubeVideos() {
 }
 
 function searchYoutubeVideos(){
+  let sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   let apiKey = PropertiesService.getScriptProperties().getProperty("YOUTUBE_DATA_API_KEY");//APIキーを取得
-  let query = '**********';//検索キーワードを指定
+  let query = 'ft重音テト';//検索キーワードを指定
+  let url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=50&key=${apiKey}`;//５０件の検索結果を取得
+  let response = UrlFetchApp.fetch(url);
+  let data = JSON.parse(response.getContentText());
+  let last = sheet.getLastRow()+1;
+  //５０件の動画データを取得して、スプレッドシートに転記
+  for (i=0 ; i<data.items.length ; i++){
+    let title = data.items[i].snippet.title;
+    let channel = data.items[i].snippet.channelTitle;
+    let release = data.items[i].snippet.publishedAt;
+    let videoId = data.items[i].id.videoId;
+    sheet.getRange(last+i,1).setValue(title);
+    sheet.getRange(last+i,2).setValue(channel);
+    sheet.getRange(last+i,3).setValue(release);
+    sheet.getRange(last+i,4).setValue(videoId);
+  }
   
+}
+
+function searchCountviews(){
+  let sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  for (let i=2; i<=sheet.getLastRow(); i++){
+    let videoId = sheet.getRange(i,4).getValue();//取得した動画の動画IDを順次取得
+    let apiKey = PropertiesService.getScriptProperties().getProperty("YOUTUBE_DATA_API_KEY")
+    let url = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${videoId}&key=${apiKey}`;
+    let response = UrlFetchApp.fetch(url);
+    let data = JSON.parse(response.getContentText());
+    let viewCount = data.items[0].statistics.viewCount//再生回数を取得
+    sheet.getRange(i,5).setValue(viewCount);//取得した再生回数を転記
+  }
+  
+}
