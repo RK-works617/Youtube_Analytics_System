@@ -1,0 +1,4 @@
+function dailyUpdate(){
+  searchViewCounts();
+  highlightTop10();
+}
