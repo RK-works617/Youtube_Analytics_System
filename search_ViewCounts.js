@@ -1,5 +1,5 @@
 function searchViewCounts(){
-  let sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  let sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("シート1");
   let sheet2 = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("シート２");
   let apiKey = PropertiesService.getScriptProperties().getProperty("YOUTUBE_DATA_API_KEY");
   let values = sheet.getRange(2,5,sheet.getLastRow()-1,1).getValues();
@@ -9,9 +9,13 @@ function searchViewCounts(){
     let url = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${videoId}&key=${apiKey}`;
     let response = UrlFetchApp.fetch(url);
     let data = JSON.parse(response.getContentText());
-    let viewCount = data.items[0].statistics.viewCount
+    if (data.items.length === 0) {//動画データ取得失敗時に処理継続
+      Logger.log("取得失敗：" + videoId);
+      continue;
+    }
+    let viewCount = Number(data.items[0].statistics.viewCount);
     sheet.getRange(i,5).setValue(viewCount);
-    let weekly = viewCount-sheet.getRange(i,6).getValue();//前回再生数との差分を計算
+    let weekly = viewCount-Number(sheet.getRange(i,6).getValue());//前回再生数との差分を計算
     sheet.getRange(i,7).setValue(weekly);//差分をスプレッドシートへ転記
   }
   let inc = sheet.getRange(2,7,sheet.getLastRow()-1,1).getValues();//保存用シートに転記する差分データを取得
