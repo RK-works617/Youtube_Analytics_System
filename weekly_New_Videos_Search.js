@@ -4,11 +4,11 @@ function weeklyNewVideosSearch() {
   let sheet = SpreadsheetApp.getActiveSpreadsheet();
   let ss = sheet.insertSheet(1).setName(date+"週間新着動画");//週間データ保存用リストを作成
   let apiKey = PropertiesService.getScriptProperties().getProperty("YOUTUBE_DATA_API_KEY");//APIキーを取得
-  ss.getRange(1,1).setValue("動画タイトル");
-  ss.getRange(1,2).setValue("公開日");
-  ss.getRange(1,3).setValue("動画ID");
-  ss.getRange(1,4).setValue("再生数");
-  ss.getRange(1,5).setValue("1日あたり再生数");//先頭行の項目名を記入
+  ss.getRange(1,1).setValue("movie_title");
+  ss.getRange(1,2).setValue("published_date");
+  ss.getRange(1,3).setValue("movie_id");
+  ss.getRange(1,4).setValue("view_count");
+  ss.getRange(1,5).setValue("per_day");//先頭行の項目名を記入
   let query = 'ft重音テト';//検索キーワードを指定
   let oneWeekAgo = new Date();
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
@@ -16,7 +16,7 @@ function weeklyNewVideosSearch() {
   let url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=50&publishedAfter=${publishedAfter}&order=viewCount&key=${apiKey}`;
   let response = UrlFetchApp.fetch(url);
   let data = JSON.parse(response.getContentText());
-  let last = sheet.getLastRow()+2;
+  let last = sheet.getLastRow()+1;
   for (let i=0 ; i<data.items.length ; i++){
     let title = data.items[i].snippet.title;
     let release = data.items[i].snippet.publishedAt;
@@ -61,3 +61,4 @@ function weeklyUpdate(){
   weeklyNewVideosSearch();
   searchViewCounts();
 }
+
